@@ -1,6 +1,6 @@
 {
   "name": "C.S.R. Sponsor Extensie",
-  "version": "2.0.4",
+  "version": "3.2",
   "manifest_version": 2,
   "description": "Wordt eraan herinnerd om relevante websites via gesponsorde C.S.R. links te bezoeken",
   "homepage_url": "https://csrdelft.nl/",
@@ -12,6 +12,20 @@
   "background": {
     "page": "src/bg/background.html"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.csrdelft.nl/*"
+      ],
+      "js": ["src/installed.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "options_ui": {
+    "page": "src/settings/settings.html",
+    "browser_style": true,
+    "chrome_style": true
+  },
   "page_action": {
     "default_icon": "icons/icon48.png"
   },
@@ -19,8 +33,12 @@
     "webNavigation",
     "alarms",
     "notifications",
-    "activeTab",
     "storage",
-    "*://*.csrdelft.nl/API/*"
-  ]
+    "*://*.sponsorkliks.nl/api/*"
+  ],
+  "applications": {
+    "gecko": {
+      "id": "sponsorextensie@csrdelft.nl"
+    }
+  }
 }
