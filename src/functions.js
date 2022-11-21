@@ -1,6 +1,8 @@
 const API = "http://csrdelft.nl/API/2.0/sponsorlinks";
 const API_TIMESTAMP = API + "/timestamp";
-const SPONSOR_LINK_FORMAT = atob("aHR0cHM6Ly93d3cuc3BvbnNvcmtsaWtzLmNvbS9saW5rLnBocD9jbHViPXtjbHViX2lkfSZzaG9wX2lkPXtzaG9wX2lkfSZzaG9wPXtzaG9wX25hbWV9");
+const SPONSOR_LINK_FORMAT = atob(
+    "aHR0cHM6Ly93d3cuc3BvbnNvcmtsaWtzLmNvbS9saW5rLnBocD9jbHViPXtjbHViX2lkfSZzaG9wX2lkPXtzaG9wX2lkfSZzaG9wPXtzaG9wX25hbWV9"
+);
 const URLS_KEY = "urls";
 const CLUBID_KEY = "club_id";
 const LASTCHECK_KEY = "lastcheck";
@@ -8,56 +10,59 @@ const TIMESTAMP_KEY = "timestamp";
 const NOTIFICATION_ID = "sponsor-notification";
 const UPDATE_CHECK_INTERVAL = 600;
 const CUSTOM_TARGETS = {
-    'www.bol.com': {
-        'shop_name': "bol.com",
-        'link': 'https://partnerprogramma.bol.com/click/click?p=1&t=url&s=2379&url=https%3A//www.bol.com/nl/index.html&f=TXL&name=tekstlink'
-    }
+    "www.bol.com": {
+        shop_name: "bol.com",
+        link: "https://partnerprogramma.bol.com/click/click?p=1&t=url&s=2379&url=https%3A//www.bol.com/nl/index.html&f=TXL&name=tekstlink",
+    },
 };
-const CHROME = typeof browser === 'undefined';
 
+// Chrome gebruikt 'chrome' ipv 'browser'
+const CHROME = typeof browser === "undefined";
 if (CHROME) {
     browser = chrome;
 }
 
-function checkUpdate() {
-    getStorage(storage => {
-        if (typeof storage[URLS_KEY] !== 'undefined') {
+const checkUpdate = () => {
+    getStorage(async (storage) => {
+        if (typeof storage[URLS_KEY] !== "undefined") {
             const lastCheck = storage[LASTCHECK_KEY] || 0;
             if (lastCheck < unixDayAgo()) {
                 const lastTimestamp = storage[TIMESTAMP_KEY] || 0;
-                $.get(API_TIMESTAMP, function (timestamp) {
-                    if (lastTimestamp < parseInt(timestamp)) {
-                        browser.storage.local.set({
-                            [LASTCHECK_KEY]: unixTime(new Date()),
-                            [TIMESTAMP_KEY]: timestamp
-                        });
-                        updateURLs();
-                    }
-                });
+                const timestamp = await fetch(API_TIMESTAMP).then((data) =>
+                    data.json()
+                );
+
+                if (lastTimestamp < parseInt(timestamp)) {
+                    browser.storage.local.set({
+                        [LASTCHECK_KEY]: unixTime(new Date()),
+                        [TIMESTAMP_KEY]: timestamp,
+                    });
+                    updateURLs();
+                }
             }
         } else {
             updateURLs();
         }
     });
-}
+};
 
-function updateURLs() {
-    $.getJSON(API, function (data) {
-        browser.storage.local.set({
-            [CLUBID_KEY]: data[CLUBID_KEY],
-            [URLS_KEY]: data['affiliates']
-        });
+async function updateURLs() {
+    const data = await fetch(API).then((data) => data.json());
+
+    browser.storage.local.set({
+        [CLUBID_KEY]: data[CLUBID_KEY],
+        [URLS_KEY]: data["affiliates"],
     });
 }
 
 function navigateTo(tabId, target) {
-    browser.tabs.update(tabId, {url: target});
+    browser.tabs.update(tabId, { url: target });
 }
 
 function formatLink(clubid, data) {
-    data['club_id'] = clubid;
+    data[CLUBID_KEY] = clubid;
     return SPONSOR_LINK_FORMAT.replace(/{(.+?)}/g, function (match, key) {
-        return typeof data[key] !== 'undefined' ? data[key] : match;
+        return typeof data[key] !== "undefined" ? data[key] : match;
     });
 }
 
@@ -71,13 +76,17 @@ function enableLinking(link, target, tabId, hostname, notificationTitle) {
     });
 
     // Notification
-    browser.notifications.create(NOTIFICATION_ID, {
-        type: "basic",
-        title: notificationTitle,
-        message: "Klik op deze notificatie of de icoon van de extensie om via die link te gaan.",
-        iconUrl: browser.extension.getURL("icons/icon128.png")
-    }, function (nId) {
-    });
+    browser.notifications.create(
+        NOTIFICATION_ID,
+        {
+            type: "basic",
+            title: notificationTitle,
+            message:
+                "Klik op deze notificatie of de icoon van de extensie om via die link te gaan.",
+            iconUrl: browser.runtime.getURL("icons/icon128.png"),
+        },
+        function (nId) {}
+    );
 
     browser.notifications.onClicked.addListener(function (notificationId) {
         if (notificationId === NOTIFICATION_ID) {
@@ -95,20 +104,20 @@ function handleCustomTarget(target, tabId, url, hostname) {
     }
 
     enableLinking(
-        target['link'],
+        target["link"],
         target,
         tabId,
         hostname,
-        target['shop_name'] + " heeft een C.S.R. affiliate link!"
+        target["shop_name"] + " heeft een C.S.R. affiliate link!"
     );
 }
 
-function navigationCompleteListener(event) {
-    getStorage(storage => {
+const navigationCompleteListener = (event) => {
+    getStorage((storage) => {
         const tabId = event.tabId;
         const url = event.url;
         const hostname = extractHostname(url);
-        const nowww_hostname = hostname.replace(/^(www\.)/,"");
+        const nowww_hostname = hostname.replace(/^(www\.)/, "");
         const custom_target = CUSTOM_TARGETS[hostname];
 
         // If we have a custom affiliate link for the current target
@@ -117,8 +126,10 @@ function navigationCompleteListener(event) {
         }
 
         const urls = storage[URLS_KEY];
-        const targets = (nowww_hostname !== hostname) ? (urls[hostname] || []).concat(urls[nowww_hostname]) : urls[hostname] ;
-
+        const targets =
+            nowww_hostname !== hostname
+                ? (urls[hostname] || []).concat(urls[nowww_hostname])
+                : urls[hostname];
 
         // If we're not on a sponsored link capable page: return
         if (!targets) {
@@ -138,18 +149,20 @@ function navigationCompleteListener(event) {
             target,
             tabId,
             hostname,
-            target['shop_name'] + " heeft ook een gesponsorde link!"
+            target["shop_name"] + " heeft ook een gesponsorde link!"
         );
     });
-}
+};
 
 function extractHostname(url) {
     //find & remove protocol (http, ftp, etc.) and get hostname, then find & remove "?"
-    return ((url.indexOf("://") > -1) ? url.split('/')[2] : url.split('/')[0]).split('?')[0];
+    return (
+        url.indexOf("://") > -1 ? url.split("/")[2] : url.split("/")[0]
+    ).split("?")[0];
 }
 
 function getStorage(key, callback) {
-    if (!callback || typeof callback !== 'function') {
+    if (!callback || typeof callback !== "function") {
         callback = key;
         key = false;
     }
@@ -161,7 +174,9 @@ function getStorage(key, callback) {
             browser.storage.local.get(callback);
         }
     } else {
-        const promise = (key) ? browser.storage.local.get(key) : browser.storage.local.get();
+        const promise = key
+            ? browser.storage.local.get(key)
+            : browser.storage.local.get();
         promise.then(callback);
     }
 }
@@ -176,5 +191,5 @@ function unixDayAgo() {
 }
 
 function unixTime(date) {
-    return Math.round((date.getTime() / 1000));
+    return Math.round(date.getTime() / 1000);
 }
