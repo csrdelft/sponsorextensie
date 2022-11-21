@@ -1,1 +1,1 @@
-document.documentElement.setAttribute('data-sponsorkliks-extension', '1');
+document.documentElement.setAttribute("data-sponsorkliks-extension", "1");
