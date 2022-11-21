@@ -13,7 +13,7 @@
 
 #### Live
 
-De Chrome extensie kan vanuit de Chrome Webstore geïnstalleerd worden: [https://chrome.google.com/webstore/detail/csv-alpha-sponsor-extensi/anlcblpmlnecbomgkbmfngcpbaciipml](https://chrome.google.com/webstore/detail/csv-alpha-sponsor-extensi/anlcblpmlnecbomgkbmfngcpbaciipml)
+De Chrome extensie kan vanuit de Chrome Webstore geïnstalleerd worden: [https://chrome.google.com/webstore/detail/csr-sponsor-extensie/ejhclpanjlbpjjjacdiohlnglmblepol](https://chrome.google.com/webstore/detail/csr-sponsor-extensie/ejhclpanjlbpjjjacdiohlnglmblepol)
 
 ### Firefox
 

@@ -1,8 +1,5 @@
-const CLUBID = 3605;
-const API =
-    "https://www.sponsorkliks.com/api/?club=" +
-    CLUBID +
-    "&call=webshops_club_extension";
+const CLUB_ID = 3605;
+const API = `https://www.sponsorkliks.com/api/?club=${CLUB_ID}&call=webshops_club_extension`;
 const URLS_KEY = "urls";
 const LASTCHECK_KEY = "lastcheck";
 const ALWAYS_REDIRECT_KEY = "always-redirect";
@@ -12,52 +9,52 @@ const CUSTOM_TARGETS = {
     "coolblue.nl": {
         category: "Computers & Electronica",
         name_short: "Coolblue",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=61&shop=Coolblue&cn=NL&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=61&shop=Coolblue&cn=NL&ln=nl`,
     },
     "www.disneylandparis.com": {
         category: "Reizen & Vakantie",
         name_short: "Disneyland Parijs",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=2283&shop=Disneyland+Parijs&cn=NL&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2283&shop=Disneyland+Parijs&cn=NL&ln=nl`,
     },
     "expert.nl": {
         category: "Computers & Electronica",
         name_short: "Expert",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=2339&shop=Expert&cn=NL&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2339&shop=Expert&cn=NL&ln=nl`,
     },
     "hema.nl": {
         category: "Huis & Tuin",
         name_short: "HEMA",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=3025&shop=HEMA&cn=nl&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=3025&shop=HEMA&cn=nl&ln=nl`,
     },
     "klm.com": {
         category: "Reizen & Vakantie",
         name_short: "KLM",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=2148&shop=KLM&cn=NL&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2148&shop=KLM&cn=NL&ln=nl`,
     },
     "mediamarkt.nl": {
         category: "Computers & Electronica",
         name_short: "MediaMarkt",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=2158&shop=MediaMarkt&cn=NL&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2158&shop=MediaMarkt&cn=NL&ln=nl`,
     },
     "superdry.nl": {
         category: "Mode & Cosmetica",
         name_short: "Superdry",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=2160&shop=Superdry+NL&cn=nl&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2160&shop=Superdry+NL&cn=nl&ln=nl`,
     },
     "schuurman-schoenen.nl": {
         category: "Mode & Cosmetica",
         name_short: "Schuurman Schoenen",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=3033&shop=Schuurman+Schoenen&cn=nl&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=3033&shop=Schuurman+Schoenen&cn=nl&ln=nl`,
     },
     "thuisbezorgd.nl": {
         category: "Eten & Drinken",
         name_short: "Thuisbezorgd.nl",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=4&shop=Thuisbezorgd.nl&cn=NL&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=4&shop=Thuisbezorgd.nl&cn=NL&ln=nl`,
     },
     "vikingdirect.nl": {
         category: "Zakelijk",
         name_short: "viking.nl",
-        link: "https://www.sponsorkliks.com/link.php?club=4509&shop_id=48&shop=Viking&cn=nl&ln=nl",
+        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=48&shop=Viking&cn=nl&ln=nl`,
     },
 };
 const CHROME = typeof browser === "undefined";
