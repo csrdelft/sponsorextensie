@@ -16,8 +16,8 @@ browser.tabs.onRemoved.addListener(function (tabId) {
 browser.runtime.onInstalled.addListener(function () {
     browser.alarms.create("SLupdateCheck", {
         delayInMinutes: UPDATE_CHECK_INTERVAL,
-        periodInMinutes: UPDATE_CHECK_INTERVAL
-    })
+        periodInMinutes: UPDATE_CHECK_INTERVAL,
+    });
 });
 
 browser.alarms.onAlarm.addListener(function (alarm) {
@@ -27,8 +27,8 @@ browser.alarms.onAlarm.addListener(function (alarm) {
 });
 
 // Check whether new version is installed
-browser.runtime.onInstalled.addListener(function(details){
-    if(details.reason == "update"){
+browser.runtime.onInstalled.addListener(function (details) {
+    if (details.reason == "update") {
         browser.storage.local.clear();
         checkUpdate();
     }
