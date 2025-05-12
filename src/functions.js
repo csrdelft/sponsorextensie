@@ -1,67 +1,25 @@
 const CLUB_ID = 3605;
 const API = `https://www.sponsorkliks.com/api/?club=${CLUB_ID}&call=webshops_club_extension`;
 const URLS_KEY = "urls";
+const CLUBID_KEY = "club_id";
 const LASTCHECK_KEY = "lastcheck";
 const ALWAYS_REDIRECT_KEY = "always-redirect";
 const NOTIFICATION_ID = "sponsor-notification-";
 const UPDATE_CHECK_INTERVAL = 600;
 const CUSTOM_TARGETS = {
-    "coolblue.nl": {
-        category: "Computers & Electronica",
-        name_short: "Coolblue",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=61&shop=Coolblue&cn=NL&ln=nl`,
-    },
-    "www.disneylandparis.com": {
-        category: "Reizen & Vakantie",
-        name_short: "Disneyland Parijs",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2283&shop=Disneyland+Parijs&cn=NL&ln=nl`,
-    },
-    "expert.nl": {
-        category: "Computers & Electronica",
-        name_short: "Expert",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2339&shop=Expert&cn=NL&ln=nl`,
-    },
-    "hema.nl": {
-        category: "Huis & Tuin",
-        name_short: "HEMA",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=3025&shop=HEMA&cn=nl&ln=nl`,
-    },
-    "klm.com": {
-        category: "Reizen & Vakantie",
-        name_short: "KLM",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2148&shop=KLM&cn=NL&ln=nl`,
-    },
-    "mediamarkt.nl": {
-        category: "Computers & Electronica",
-        name_short: "MediaMarkt",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2158&shop=MediaMarkt&cn=NL&ln=nl`,
-    },
-    "superdry.nl": {
-        category: "Mode & Cosmetica",
-        name_short: "Superdry",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=2160&shop=Superdry+NL&cn=nl&ln=nl`,
-    },
-    "schuurman-schoenen.nl": {
-        category: "Mode & Cosmetica",
-        name_short: "Schuurman Schoenen",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=3033&shop=Schuurman+Schoenen&cn=nl&ln=nl`,
-    },
-    "thuisbezorgd.nl": {
-        category: "Eten & Drinken",
-        name_short: "Thuisbezorgd.nl",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=4&shop=Thuisbezorgd.nl&cn=NL&ln=nl`,
-    },
-    "vikingdirect.nl": {
-        category: "Zakelijk",
-        name_short: "viking.nl",
-        link: `https://www.sponsorkliks.com/link.php?club=${CLUB_ID}&shop_id=48&shop=Viking&cn=nl&ln=nl`,
-    },
+    "www.bol.com": {
+        "name_short": "bol.com",
+        "shop_name": "bol.com",
+        "link": "https://partnerprogramma.bol.com/click/click?p=1&t=url&s=2379"
+    }
 };
 const CHROME = typeof browser === "undefined";
 
 if (CHROME) {
     browser = chrome;
 }
+
+console.log("[SPONSOREXTENSIE] L21: in sponsorextensie script");
 
 /**
  * Check if we should update the websites with affiliate links from the API
@@ -113,7 +71,9 @@ async function updateURLs() {
  * @param target {string} new website url
  */
 function navigateTo(tabId, target) {
-    browser.tabs.update(tabId, { url: target });
+    console.log("[SPONSOREXTENSIE] L73: de url wordt nu vervangen");
+    browser.tabs.update(tabId, {url: target});
+    console.log("[SPONSOREXTENSIE] L75: de url is vervangen door " + target);
 }
 
 /**
@@ -125,9 +85,10 @@ function navigateTo(tabId, target) {
  * @param notificationTitle {string} title of the notification
  */
 function enableLinking(link, tabId, hostname, referrer, notificationTitle) {
+
     // Page action
-    browser.pageAction.show(tabId);
-    browser.pageAction.onClicked.addListener(function () {
+    //browser.action.setPopup({tabId: tabId, popup: browser.runtime.getURL("src/popup.html")});
+    browser.action.onClicked.addListener(function () {
         sponsortabs[tabId] = { hostname: hostname, referrer: referrer };
         browser.notifications.clear(NOTIFICATION_ID);
         navigateTo(tabId, link);
@@ -141,7 +102,7 @@ function enableLinking(link, tabId, hostname, referrer, notificationTitle) {
             title: notificationTitle,
             message:
                 "Klik op deze notificatie of de icoon van de extensie om via die link te gaan.",
-            iconUrl: browser.extension.getURL("icons/icon128.png"),
+            iconUrl: browser.runtime.getURL("icons/icon128.png"),
         },
         function (nId) {}
     );
@@ -160,6 +121,7 @@ function enableLinking(link, tabId, hostname, referrer, notificationTitle) {
  * @param event {object}
  */
 function navigationCompleteListener(event) {
+    console.log("Nieuwe url: " + event.url);
     getStorage([URLS_KEY, ALWAYS_REDIRECT_KEY], (storage) => {
         const tabId = event.tabId;
         const url = event.url;
@@ -195,9 +157,11 @@ function navigationCompleteListener(event) {
 
         if (storage[ALWAYS_REDIRECT_KEY]) {
             // Immediately redirect to the affiliated link
+            console.log("[SPONSOREXTENSIE] L154: je wordt altijd automatisch doorgestuurd voor deze website");
             sponsortabs[tabId] = { hostname: hostname, referrer: url };
             navigateTo(tabId, target["link"]);
         } else {
+            console.log("[SPONSOREXTENSIE] L158: je hoort nu een melding te krijgen");
             enableLinking(
                 target["link"],
                 tabId,
@@ -218,6 +182,7 @@ function navigationCompleteListener(event) {
  * @returns {string} url with the protocol, path and get parameters stripped
  */
 function extractHostname(url) {
+    //find & remove protocol (http, ftp, etc.) and get hostname, then find & remove "?"
     return (
         url.indexOf("://") > -1 ? url.split("/")[2] : url.split("/")[0]
     ).split("?")[0];
