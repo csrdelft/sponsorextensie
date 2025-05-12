@@ -10,7 +10,7 @@ const CUSTOM_TARGETS = {
     "www.bol.com": {
         "name_short": "bol.com",
         "shop_name": "bol.com",
-        "link": "https://partnerprogramma.bol.com/click/click?p=1&t=url&s=2379"
+        "link": "https://partner.bol.com/click/click?p=1&t=url&s=2379&name=test1"
     }
 };
 const CHROME = typeof browser === "undefined";
