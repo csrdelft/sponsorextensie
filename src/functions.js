@@ -31,28 +31,32 @@ export default class Functions {
   * Get all the websites with affiliate links from the API
   */
   async updateURLs() {
-    let shopsReq = await fetch(Constants.BASE_API + "?call=webshops_club&show=json&code=" + Constants.API_CODE);
-    shopsReq = await shopsReq.json();
-    let shops = shopsReq.webshops;
+    let mogelijkeWinkels = []
 
-    let shopsUrlsReq = await fetch(Constants.BASE_API + "get_shops.php?code=" + Constants.API_CODE);
-    let shopsUrls = await shopsUrlsReq.json();
+    try {
+      let winkelReq = await fetch(Constants.BASE_API + "?call=webshops_club&show=json&code=" + Constants.API_CODE);
+      winkelReq = await winkelReq.json();
+      let winkels = winkelReq.webshops;
 
-    let winkels = []
+      let winkelUrlReq = await fetch(Constants.BASE_API + "get_shops.php?code=" + Constants.API_CODE);
+      let winkelUrl = await winkelUrlReq.json();
 
-    for (const shop of shops) {
-      const match = shop.link.match(/shop_id=(\d+)/i);
-      if (!match) continue;
-      const id = match[1];
+      for (const winkel of winkels) {
+        const match = winkel.link.match(/shop_id=(\d+)/i);
+        if (!match) continue;
+        const id = match[1];
 
-      const currentShop = shopsUrls.find((y) => y.shopnr == id);
+        const huidigeWinkel = winkelUrl.find((y) => y.shopnr == id);
 
-      winkels.push({
-        name_short: shop.name_short,
-        shop_name: shop.name_long,
-        orig_url: currentShop && currentShop.url ? currentShop.url : "",
-        link: `https://www.sponsorkliks.com/link.php?club=${Constants.CLUB_ID}&shop_id=${id}&src=brexsc&code=${Constants.API_CODE}`,
-      });
+        mogelijkeWinkels.push({
+          name_short: winkel.name_short,
+          shop_name: winkel.name_long,
+          orig_url: huidigeWinkel && huidigeWinkel.url ? huidigeWinkel.url : "",
+          link: `https://www.sponsorkliks.com/link.php?club=${Constants.CLUB_ID}&shop_id=${id}&src=brexsc&code=${Constants.API_CODE}`,
+        });
+      }
+    } catch (e) {
+      console.log("[SPONSOREXTENSIE] de lijst met winkels kon niet worden opgehaald bij sponsorkliks");
     }
 
     // Add custom targets that are not present in the API
@@ -60,12 +64,14 @@ export default class Functions {
       var custom_data = Constants.CUSTOM_TARGETS[url];
       custom_data["orig_url"] = url;
 
-      winkels = winkels.filter((w) => w.orig_url !== url);
-      winkels.push(custom_data);
+      mogelijkeWinkels = mogelijkeWinkels.filter((w) => w.orig_url !== url);
+      mogelijkeWinkels.push(custom_data);
     }
 
+    mogelijkeWinkels = mogelijkeWinkels.filter((w) => Functions.extractHostname(w.orig_url) !== "www.sponsorkliks.com");
+
     browser.storage.local.set({
-      [Constants.URLS_KEY]: winkels
+      [Constants.URLS_KEY]: mogelijkeWinkels
         .filter((obj) => !!obj.orig_url)
         .reduce(function (map, obj) {
           map[Functions.extractHostname(obj.orig_url)] = obj;
