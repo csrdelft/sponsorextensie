@@ -84,10 +84,14 @@ export default class Functions {
   * @param tabId {number} id of the tab to change the website of
   * @param target {string} new website url
   */
-  static navigateTo(tabId, target) {
+  static async navigateTo(tabId, target) {
     console.log("[SPONSOREXTENSIE] L73: de url wordt nu vervangen");
-    browser.tabs.update(tabId, { url: target });
-    console.log("[SPONSOREXTENSIE] L75: de url is vervangen door " + target);
+    try {
+      await browser.tabs.update(tabId, { url: target });
+      console.log("[SPONSOREXTENSIE] L75: de url is vervangen door " + target);
+    } catch (error) {
+      console.error("[SPONSOREXTENSIE] Navigation failed:", error);
+    }
   }
 
   /**
@@ -102,9 +106,11 @@ export default class Functions {
 
     // Page action
     //browser.action.setPopup({tabId: tabId, popup: browser.runtime.getURL("src/popup.html")});
-    browser.action.onClicked.addListener(function () {
+    browser.action.onClicked.addListener(function (tab) {
+      if (tab.id !== tabId) return;
+
       sponsortabs[tabId] = { hostname: hostname, referrer: referrer };
-      browser.notifications.clear(Constants.NOTIFICATION_ID);
+      browser.notifications.clear(Constants.NOTIFICATION_ID + tabId);
       Functions.navigateTo(tabId, link);
     });
 
@@ -118,7 +124,6 @@ export default class Functions {
           "Klik op deze notificatie of de icoon van de extensie om via die link te gaan.",
         iconUrl: browser.runtime.getURL("icons/icon128.png"),
       },
-      function (nId) { }
     );
 
     browser.notifications.onClicked.addListener(function (notificationId) {
