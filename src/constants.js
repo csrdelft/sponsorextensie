@@ -12,7 +12,7 @@ export default class Constants {
     "www.bol.com": {
       "name_short": "Bol.com",
       "shop_name": "bol.com",
-      "link": "https://partner.bol.com/click/click?p=1&t=url&s=2379&name=test1"
+      "link": "https://partner.bol.com/click/click?p=2&t=url&s=2379&f=TXL&url=https%3A%2F%2Fwww.bol.com%2Fnl%2Fnl%2F&name=sponsor"
     }
   };
 }
