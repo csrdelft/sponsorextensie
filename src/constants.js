@@ -11,7 +11,8 @@ export default class Constants {
   static CUSTOM_TARGETS = {
     "www.bol.com": {
       "name_short": "Bol.com",
-      "shop_name": "bol.com",
+      "shop_name": "bol",
+      "orig_url": "bol.com",
       "link": "https://partner.bol.com/click/click?p=2&t=url&s=2379&f=TXL&url=https%3A%2F%2Fwww.bol.com%2Fnl%2Fnl%2F&name=sponsor"
     }
   };
