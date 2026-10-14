@@ -62,13 +62,12 @@ export default class Functions {
     // Add custom targets that are not present in the API
     for (var url in Constants.CUSTOM_TARGETS) {
       var custom_data = Constants.CUSTOM_TARGETS[url];
-      custom_data["orig_url"] = url;
 
-      mogelijkeWinkels = mogelijkeWinkels.filter((w) => w.orig_url !== url);
+      mogelijkeWinkels = mogelijkeWinkels.filter((w) => w.orig_url !== custom_data.orig_url);
       mogelijkeWinkels.push(custom_data);
     }
 
-    mogelijkeWinkels = mogelijkeWinkels.filter((w) => Functions.extractHostname(w.orig_url) !== "www.sponsorkliks.com");
+    mogelijkeWinkels = mogelijkeWinkels.filter((w) => w.orig_url && Functions.extractHostname(w.orig_url) !== "www.sponsorkliks.com");
 
     browser.storage.local.set({
       [Constants.URLS_KEY]: mogelijkeWinkels
