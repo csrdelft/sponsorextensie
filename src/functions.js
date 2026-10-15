@@ -49,8 +49,7 @@ export default class Functions {
         const huidigeWinkel = winkelUrl.find((y) => y.shopnr == id);
 
         mogelijkeWinkels.push({
-          name_short: winkel.name_short,
-          shop_name: winkel.name_long,
+          name: winkel.name_short,
           orig_url: huidigeWinkel && huidigeWinkel.url ? huidigeWinkel.url : "",
           link: `https://www.sponsorkliks.com/link.php?club=${Constants.CLUB_ID}&shop_id=${id}&src=brexsc&code=${Constants.API_CODE}`,
         });
@@ -103,9 +102,7 @@ export default class Functions {
   * @param notificationTitle {string} title of the notification
   */
   static enableLinking(link, tabId, hostname, referrer, notificationTitle) {
-
-    // Page action
-    //browser.action.setPopup({tabId: tabId, popup: browser.runtime.getURL("src/popup.html")});
+    // Runs when the extention icon is clicked
     browser.action.onClicked.addListener(function (tab) {
       if (tab.id !== tabId) return;
 
@@ -137,59 +134,61 @@ export default class Functions {
 
   /**
   * Called when a user navigates to an url
-  * @param event {object}
+  * @param details {object}
   */
-  navigationCompleteListener(event) {
-    console.log("Nieuwe url: " + event.url);
-    Functions.getStorage([Constants.URLS_KEY, Constants.ALWAYS_REDIRECT_KEY], (storage) => {
-      const tabId = event.tabId;
-      const url = event.url;
-      const hostname = Functions.extractHostname(url);
-      const nowww_hostname = hostname.replace(/^(www\.)/, "");
+  navigationCompleteListener(details) {
+    if (details.frameId === 0) {
+      console.log("Nieuwe url: " + details.url);
+      Functions.getStorage([Constants.URLS_KEY, Constants.ALWAYS_REDIRECT_KEY], (storage) => {
+        const tabId = details.tabId;
+        const url = details.url;
+        const hostname = Functions.extractHostname(url);
+        const nowww_hostname = hostname.replace(/^(www\.)/, "");
 
-      // If there is no hostname found: return
-      if (!hostname) {
-        return;
-      }
-
-      const urls = storage[Constants.URLS_KEY];
-      if (!urls) {
-        // Apparently we were not able to retrieve the urls from the API yet
-        return;
-      }
-      const target = urls[hostname] || urls[nowww_hostname];
-
-      // If we're not on a sponsored link capable page: return
-      if (!target) {
-        return;
-      }
-
-      // Check if we're still visiting the same site we already went through a sponsored link for
-      if (sponsortabs[tabId] && hostname === sponsortabs[tabId]["hostname"]) {
-        // If we have a origin location we came for, redirect back to that page
-        if (sponsortabs[tabId]["referrer"]) {
-          Functions.navigateTo(tabId, sponsortabs[tabId]["referrer"]);
-          sponsortabs[tabId]["referrer"] = null;
+        // If there is no hostname found: return
+        if (!hostname) {
+          return;
         }
-        return;
-      }
 
-      if (storage[Constants.ALWAYS_REDIRECT_KEY]) {
-        // Immediately redirect to the affiliated link
-        console.log("[SPONSOREXTENSIE] L154: je wordt altijd automatisch doorgestuurd voor deze website");
-        sponsortabs[tabId] = { hostname: hostname, referrer: url };
-        Functions.navigateTo(tabId, target["link"]);
-      } else {
-        console.log("[SPONSOREXTENSIE] L158: je hoort nu een melding te krijgen");
-        Functions.enableLinking(
-          target["link"],
-          tabId,
-          hostname,
-          url,
-          target["name_short"] + " heeft ook een gesponsorde link!"
-        );
-      }
-    });
+        const urls = storage[Constants.URLS_KEY];
+        if (!urls) {
+          // Apparently we were not able to retrieve the urls from the API yet
+          return;
+        }
+        const target = urls[hostname] || urls[nowww_hostname];
+
+        // If we're not on a sponsored link capable page: return
+        if (!target) {
+          return;
+        }
+
+        // Check if we're still visiting the same site we already went through a sponsored link for
+        if (sponsortabs[tabId] && hostname === sponsortabs[tabId]["hostname"]) {
+          // If we have a origin location we came for, redirect back to that page
+          if (sponsortabs[tabId]["referrer"]) {
+            Functions.navigateTo(tabId, sponsortabs[tabId]["referrer"]);
+            sponsortabs[tabId]["referrer"] = null;
+          }
+          return;
+        }
+
+        if (storage[Constants.ALWAYS_REDIRECT_KEY]) {
+          // Immediately redirect to the affiliated link
+          console.log("[SPONSOREXTENSIE] L154: je wordt altijd automatisch doorgestuurd voor deze website");
+          sponsortabs[tabId] = { hostname: hostname, referrer: url };
+          Functions.navigateTo(tabId, target["link"]);
+        } else {
+          console.log("[SPONSOREXTENSIE] L158: je hoort nu een melding te krijgen");
+          Functions.enableLinking(
+            target["link"],
+            tabId,
+            hostname,
+            url,
+            target["name"] + " heeft ook een gesponsorde link!"
+          );
+        }
+      });
+    }
   }
 
   /**
