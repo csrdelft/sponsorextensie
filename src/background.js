@@ -12,30 +12,28 @@ browser.tabs.onRemoved.addListener(function (tabId) {
   if (sponsortabs[tabId]) {
     delete sponsortabs[tabId];
   }
-  browser.notifications.clear(Constants.NOTIFICATION_ID);
+  browser.notifications.clear(Constants.NOTIFICATION_ID + tabId);
 });
 
-// Register for periodic endpoint updates
-browser.runtime.onInstalled.addListener(function () {
+// Register for periodic endpoint updates and check for new update
+browser.runtime.onInstalled.addListener(function (details) {
   console.log("L20 periodic check register");
   browser.alarms.create("SLupdateCheck", {
     delayInMinutes: Constants.UPDATE_CHECK_INTERVAL,
     periodInMinutes: Constants.UPDATE_CHECK_INTERVAL,
   });
-});
 
-browser.alarms.onAlarm.addListener(function (alarm) {
-  console.log(`L28 alarm ${alarm} being added`);
-  if (alarm.name === "SLupdateCheck") {
+  console.log("L36 check if there was an update");
+  if (details.reason === "update") {
+    browser.storage.local.remove([Constants.URLS_KEY, Constants.LASTCHECK_KEY]);
     functions.checkUpdate();
   }
 });
 
-// Check whether new version is installed
-browser.runtime.onInstalled.addListener(function (details) {
-  console.log(`L36 details ${details} to check if there was an update`);
-  if (details.reason === "update") {
-    browser.storage.local.remove([Constants.URLS_KEY, Constants.LASTCHECK_KEY]);
+// Automatic updates 
+browser.alarms.onAlarm.addListener(function (alarm) {
+  console.log(`L28 alarm ${alarm} being added`);
+  if (alarm.name === "SLupdateCheck") {
     functions.checkUpdate();
   }
 });
